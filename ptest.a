@@ -24,41 +24,41 @@ ptest:
                             // initialize screen memory pointer 'scnp'
                             // and other variables
             lda #$00
-            sta curlin
-            sta curcol
-            sta scnp        // low byte of screen RAM = zero
+            sta.z curlin    // 'sta.z' mnemonic extension required by Kick Assembler
+            sta.z curcol    // to assemble zero-page address (because of labeling)
+            sta.z scnp      // low byte of screen RAM = zero
             lda #$04        // high byte of screen RAM ($0400)
-            sta scnp+1
+            sta.z scnp+1
     
 // ==== Test Section: 
             lda #<puw_str   // put address of start of string "puw_str"
-            sta strp        // into zero-page pointer 'strp' (low byte)
+            sta.z strp      // into zero-page pointer 'strp' (low byte)
             lda #>puw_str   // high byte of start of string(s)
-            sta strp+1      // initialize high byte of string pointer
+            sta.z strp+1    // initialize high byte of string pointer
             jsr pwrap       // print the string
             
             lda #$00        // clear "wrap flag" (wf) so that text
             sta wf          // will be printed w/o word wrap
             lda #<string1   // put address of start of test string(s)
-            sta strp        // into zero-page pointer 'strp' (low byte)
+            sta.z strp      // into zero-page pointer 'strp' (low byte)
             lda #>string1   // high byte of start of string(s)
-            sta strp+1      // initialize high byte of string pointer
+            sta.z strp+1    // initialize high byte of string pointer
             jsr pwrap       // test printing strings not wrapped
     
             pha             // save accumulator
         
             lda #<pwr_str   // put address of start of string "pwr_str"
-            sta strp        // into zero-page pointer 'strp' (low byte)
+            sta.z strp      // into zero-page pointer 'strp' (low byte)
             lda #>pwr_str   // high byte of start of string(s)
-            sta strp+1      // initialize high byte of string pointer
+            sta.z strp+1    // initialize high byte of string pointer
             jsr pwrap       // print the string
 
             lda #$01        // set "wrap flag" (wf) to select option to
             sta wf          // wrap text at the end of lines
             lda #<string1   // put address of start of test string(s)
-            sta strp        // into zero-page pointer 'strp' (low byte)
+            sta.z strp      // into zero-page pointer 'strp' (low byte)
             lda #>string1   // high byte of start of string(s)
-            sta strp+1      // initialize high byte of string pointer
+            sta.z strp+1    // initialize high byte of string pointer
 
             jsr pwrap       // test printing strings wrapped
 
