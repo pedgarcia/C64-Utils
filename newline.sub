@@ -1,67 +1,67 @@
-; 
-			;
-			;
-			;
-			; Subroutine "newline"
-			;
-			; increments the current line
-			; number (variable "curlin")
-			;
-			; resets the curcol
-			; variable to zero
-			;
-			; and updates the screen
-			; pointer "scnp" to the address
-			; of column zero
-			;
-			;
-			; This also contains separate
-			; entry point for
-			; Subroutine "setline", which
-			; sets variable "scnp" to
-			; column zero of the line
-			; number contained in acc.
-			;
-			;
+//  
+			// 
+			// 
+			// 
+			//  Subroutine "newline"
+			// 
+			//  increments the current line
+			//  number (variable "curlin")
+			// 
+			//  resets the curcol
+			//  variable to zero
+			// 
+			//  and updates the screen
+			//  pointer "scnp" to the address
+			//  of column zero
+			// 
+			// 
+			//  This also contains separate
+			//  entry point for
+			//  Subroutine "setline", which
+			//  sets variable "scnp" to
+			//  column zero of the line
+			//  number contained in acc.
+			// 
+			// 
 
-newline 
-			inc curlin		;curlin defined in
-			;main program
+newline: 
+			inc curlin		// curlin defined in
+			// main program
 
-setline 
-			;save 'x' first
+setline: 
+			// save 'x' first
 			txa
 			pha
 
-			lda curlin		;get curlin in A
-			asl 			;multiply by two to get
-			;index into screen addr
-			;table
+			lda curlin		// get curlin in A
+			asl 			// multiply by two to get
+			// index into screen addr
+			// table
 
-			tax				;transfer to x index
-			lda scntbl,x	;screen table for
-			;column zero addresses
-			sta scnp		;screen pointer
+			tax				// transfer to x index
+			lda scntbl,x	// screen table for
+			// column zero addresses
+			sta scnp		// screen pointer
 			inx
-			lda scntbl,x	;high byte addr
+			lda scntbl,x	// high byte addr
 			sta scnp+1
-			;
+			// 
 			lda #0
-			sta curcol		;set current column
-			;variable to zero
-			;
-			; done - return to caller
-			;
-			; Restore 'x' register
+			sta curcol		// set current column
+			// variable to zero
+			// 
+			//  done - return to caller
+			// 
+			//  Restore 'x' register
 			pla
 			tax
-			;
+			// 
 
 			rts
 
-			;
-			;
-			; End Subroutine "newline.sub"
-			;
-			;
+			// 
+			// 
+			//  End Subroutine "newline.sub"
+			// 
+			// 
 

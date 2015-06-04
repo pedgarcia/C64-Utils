@@ -23,28 +23,24 @@ jmp ptest // skip over data area
                        // control reg.
 .label plot     = $e50a       // Kernal routine
          // to position the cursor
-wf       !byte 0  // wrap flag for print.
+wf:      .byte 0  // wrap flag for print.
          // 
          // if wf is set, print with
          // word wrapping. If flag is
          // clear, print w/o wrapping
 
-dogetl   !byte 0  // flag - do getlength
+dogetl:  .byte 0  // flag - do getlength
 
-!convtab pet {	//  Convert text strings into PETSCII.
-					//  Using our own "conv" routine to convert
-					//  PETSCII to screencodes, instead of ACME's !scr,
-					//  so that we can also handle control characters 
-					//  such as <RETURN> (#$0d)
 					
-string1 !text "This is another test. I will put in several different strings "
-        !text "to check the operation of the wrap subroutine. This line"
-        !text " does not have leading spaces in it. Line ends here.  "
-		 !text "Another line follows: ", 13 //  Return char
-		 !text "This line ends with a zero delimiter. Bye now!",0
-}
+string1:	.text "This is another test. I will put in several different strings "
+        	.text "to check the operation of the wrap subroutine. This line"
+        	.text " does not have leading spaces in it. Line ends here.  "
+		 	.text "Another line follows: "
+		 	.byte 13 //  Return char
+		 	.text "This line ends with a zero delimiter. Bye now!"
+		 	.byte 0  // End-of-string delimiter
 
-ptest
+ptest:
          // put random values in A, x,
          // and y, to test that they are
          // properly restored at end of
@@ -134,7 +130,7 @@ ptest
 
 
 
-pwrap    // save registers on stack
+pwrap:   // save registers on stack
 
          pha
          txa
@@ -164,9 +160,9 @@ pwrap    // save registers on stack
 			ldy #$ff// index into string
 
 
-loop1    	iny // main loop
+loop1:    	iny // main loop
 
-noiny    	lda (strp),y // char in string
+noiny:   	lda (strp),y // char in string
 			beq jmpout // delimiter reached.
 			cmp #$20 // space char?
 			beq isspc
@@ -174,12 +170,11 @@ noiny    	lda (strp),y // char in string
 			beq isreturn //  it's a return//  print a newline 
 			bne chkwf
 			
-isreturn
+isreturn:
 			jsr newline 
 			jmp loop1
 
-isspc
-			jsr conv // convert to screencode
+isspc:
 			jsr prin // print the spc char
 			clc
 			bcc loop1
@@ -189,7 +184,7 @@ isspc
          // Print string without wrap if
          // flag is clear.
 
-chkwf
+chkwf:
          lda wf
          bne pwrapped // print wrapped
 
@@ -197,7 +192,7 @@ chkwf
          //  wf is clear//  print entire
          //  string without word wrap.
          
-pnwloop
+pnwloop:
 			lda (strp),y 	// get char in string
 			beq pnwdone 	// delimiter reached
 			cmp #$0d 		//  Return char?
@@ -207,8 +202,7 @@ pnwloop
 			iny 			// point to next char
 			jmp pnwloop
 			
-pnwc	 	jsr conv		// convert to screencode
-           sty savy		//  save strp's y index
+pnwc:		sty savy		//  save strp's y index
 		    ldy curcol    //  index for printing current line
 			jsr prin		// print char- which also increments curcol.
 			ldy savy      //  get strp's y index back
@@ -216,15 +210,15 @@ pnwc	 	jsr conv		// convert to screencode
 			jmp pnwloop 	// print more
 
 
-pnwdone
+pnwdone:
          // number of characters printed
          // divided by 40 = current line
          // number.
 
-calcline
+calcline:
          ldx #$ff
          tya // get index y into a
-calclp
+calclp:
          inx
          sec
          sbc #40
@@ -234,18 +228,18 @@ calclp
 
 			stx curlin // calculated line #
 
-jmpout		jmp out1// done printing-
+jmpout:		jmp out1// done printing-
                   // exit and return
 
 
 
-pwrapped
+pwrapped:
          jsr getlen // get length of non-
                     // space portion of
                     // current string
                     // (in curlen)
 
-chkrm
+chkrm:
          lda curlen // 
          clc
          adc curcol //  if curlen + curcol
@@ -263,7 +257,7 @@ chkrm
          // line to print strp segment.
 
 
-yeswrap  // string segment would run past
+yeswrap: // string segment would run past
          // end of line. Print it on a
          // new line.
 
@@ -271,9 +265,9 @@ yeswrap  // string segment would run past
                     //  the next line, on
                     //  column zero
 
-nowrap   ldx curlen //  index for loop
+nowrap:  ldx curlen //  index for loop
 
-prinlp
+prinlp:
          // getlen did not upddate 'y'
          // it's still pointing to the
          // first non-space char in
@@ -282,7 +276,6 @@ prinlp
 			lda (strp),y
 			sty savy // save y reg
 			ldy curcol // (scnp) 'y' index
-			jsr conv // convert to screencode
 			jsr prin		//  print char in A 
 			ldy savy // get (strp) 'y' back.
 			iny //  point to next char in string
@@ -297,7 +290,7 @@ prinlp
 			jmp loop1 // get more chars
 
 
-prin
+prin:
 			sta (scnp),y		//  assumes char in 'a' is screencode
 			inc curcol			// update column #
 			lda curcol			// if we're at column 40, print a newline
@@ -305,11 +298,11 @@ prin
 			bne prinrts
 			jsr newline		// move cursor to next line, column zero
 						
-prinrts		rts // return to caller
+prinrts:	rts // return to caller
 
 
 
-out1
+out1:
 			jsr newline
 			
 			// use Kernal routine "PLOT" to set cursor position to one
@@ -343,7 +336,7 @@ out1
 
 
 
-getlen		// Subroutine to get the length
+getlen:		// Subroutine to get the length
 			// of the current non-space part
 			// of the string.
 		
@@ -362,7 +355,7 @@ getlen		// Subroutine to get the length
 			tya
 			pha
 		
-getlp		
+getlp:		
 			iny // get next char in string
 			lda (strp),y
 			beq gotlen // we reached the
@@ -381,7 +374,7 @@ getlp
 						// delimiter is
 						// reached.
 		
-gotlen		       // we have the length
+gotlen:		       // we have the length
 		
 					// restore 'y' and
 					// return
@@ -394,10 +387,10 @@ gotlen		       // we have the length
 			// 
 			// included sources follow:
 		
-			!src "newline.sub"
-			!src "bt.sub"
-			!src "cls.sub"
-			!src "conv.sub"
+			.import source "newline.sub"
+			.import source "bt.sub"
+			.import source "cls.sub"
+			// don't need it ---> .import source "conv.sub"
 			// 
 			// 
 			//  end

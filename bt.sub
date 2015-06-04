@@ -13,12 +13,12 @@
 							// 
 							//  area for table
 
-scntbl	!byte 0
+scntbl:	.byte 0
 
-*= scntbl+50				// 50 bytes = 25
+.pc = scntbl+50				// 50 bytes = 25
 							// address words
 
-bt 
+bt: 
 							//  save 'y' register
 		tya
 		pha
@@ -34,7 +34,7 @@ bt
 		lda #4
 		sta scntbl+1			// high byte
 
-btloop	cpy #$30			// done 24 addresses?
+btloop:	cpy #$30			// done 24 addresses?
 		beq out				// yes- jump out
 		lda (strp),y			// low byte
 		clc
@@ -52,7 +52,7 @@ btloop	cpy #$30			// done 24 addresses?
 		dey					// point back to low byte of address
 		bcc btloop
 
-incrhi	dey					// point to high byte
+incrhi:	dey					// point to high byte
 		lda (strp),y
 		iny
 		iny
@@ -62,7 +62,7 @@ incrhi	dey					// point to high byte
 		dey
 		bcc btloop			// do more
 
-out							// restore 'y'
+out:						// restore 'y'
 		pla
 		tay
 
