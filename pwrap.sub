@@ -1,0 +1,292 @@
+
+// ==================================================
+// 
+//   Subroutine "pwrap.sub"
+// 
+// ==================================================
+
+         // 
+         //  prints a string to screen
+         //  using
+         // 
+         //  strp = string pointer
+         //  scnp = screen pointer
+         // 
+         //  advances scnp to column zero
+         //  of next line (updates
+         //  variables curlin & curcol)
+         // 
+         //  also wraps a word to the
+         //  next line if it would run
+         //  past column 39
+         // 
+
+
+
+
+
+pwrap:   // save registers on stack
+
+         pha
+         txa
+         pha
+         tya
+         pha
+
+         lda #0
+         sta curcol // start on column 0
+
+         // clear screen
+         // jsr cls
+
+
+         // get screen address for
+         // column zero of current row
+         // and set our variables
+
+         jsr setline // (uses curlin)
+
+
+                     // sets (scnp) to
+         // column zero of line number
+         // in curlin
+
+
+			ldy #$ff// index into string
+
+
+loop1:    	iny // main loop
+
+noiny:   	lda (strp),y // char in string
+			beq jmpout // delimiter reached.
+			cmp #$20 // space char?
+			beq isspc
+			cmp #$0d //  Return char?
+			beq isreturn //  it's a return//  print a newline 
+			bne chkwf
+			
+isreturn:
+			jsr newline 
+			jmp loop1
+
+isspc:
+			jsr prin // print the spc char
+			clc
+			bcc loop1
+
+         // check wrap flag. Print string
+         // wrapped if flag is set.
+         // Print string without wrap if
+         // flag is clear.
+
+chkwf:
+         lda wf
+         bne pwrapped // print wrapped
+
+
+         //  wf is clear//  print entire
+         //  string without word wrap.
+         
+pnwloop:
+			lda (strp),y 	// get char in string
+			beq pnwdone 	// delimiter reached
+			cmp #$0d 		//  Return char?
+			bne pnwc
+			jsr newline 	//  was a Return- print newline
+							//  and loop back	
+			iny 			// point to next char
+			jmp pnwloop
+			
+pnwc:		sty savy		//  save strp's y index
+		    ldy curcol    //  index for printing current line
+			jsr prin		// print char- which also increments curcol.
+			ldy savy      //  get strp's y index back
+			iny
+			jmp pnwloop 	// print more
+
+
+pnwdone:
+         // number of characters printed
+         // divided by 40 = current line
+         // number.
+
+calcline:
+         ldx #$ff
+         tya // get index y into a
+calclp:
+         inx
+         sec
+         sbc #40
+         bcs calclp // when carry is
+         // clear, we have the current
+         // line number in x
+
+			stx curlin // calculated line #
+
+jmpout:		jmp out1// done printing-
+                  // exit and return
+
+
+
+pwrapped:
+         jsr getlen // get length of non-
+                    // space portion of
+                    // current string
+                    // (in curlen)
+
+chkrm:
+         lda curlen // 
+         clc
+         adc curcol //  if curlen + curcol
+         //  is > $28, we have to wrap the
+         // string segment to next line.
+
+         clc
+         cmp #$28
+
+         bcs yeswrap // carry will be set
+         // if Acc => #$28
+
+         bcc nowrap //  carry is clear,
+         // so we have room on current
+         // line to print strp segment.
+
+
+yeswrap: // string segment would run past
+         // end of line. Print it on a
+         // new line.
+
+         jsr newline//  move cursor to
+                    //  the next line, on
+                    //  column zero
+
+nowrap:  ldx curlen //  index for loop
+
+prinlp:
+         // getlen did not upddate 'y'
+         // it's still pointing to the
+         // first non-space char in
+         // current string segment.
+
+			lda (strp),y
+			sty savy // save y reg
+			ldy curcol // (scnp) 'y' index
+			jsr prin		//  print char in A 
+			ldy savy // get (strp) 'y' back.
+			iny //  point to next char in string
+			dex
+			bne prinlp // loop until done.
+			dey // we have to dey, because
+             // beginning of loop1 does
+             // iny.
+			lda #0
+			sta curlen//  reset curlen to zero
+
+			jmp loop1 // get more chars
+
+
+prin:
+			sta (scnp),y		//  assumes char in 'a' is screencode
+			inc curcol			// update column #
+			lda curcol			// if we're at column 40, print a newline
+			cmp #$28
+			bne prinrts
+			jsr newline		// move cursor to next line, column zero
+						
+prinrts:	rts // return to caller
+
+
+
+out1:
+			jsr newline
+			
+			// use Kernal routine "PLOT" to set cursor position to one
+			// line past the printed string, before returning to BASIC.
+			
+			ldy #0 // curlin // column #
+			
+			inc curlin //  one row down
+			ldx curlin // row position
+			clc
+			jsr plot
+			
+			//  restore registers A, x and y
+			pla
+			tay
+			pla
+			tax
+			pla
+			
+			rts // return to caller
+			
+			// 
+			//  end Subroutine "pwrap.sub"
+			// 
+			// 
+			//  (end temp driver program
+			//     "ptest.a"
+			// 
+			// 
+			
+
+
+
+getlen:		// Subroutine to get the length
+			// of the current non-space part
+			// of the string.
+		
+			// uses local variable curlen to
+			// store length.
+			// initialize at 1, since we
+			// already have a non-space char
+			// starting the current string.
+		
+			lda #1
+			sta curlen
+		
+			// save y reg, since we'll use
+			// it to parse string..
+		
+			tya
+			pha
+		
+getlp:		
+			iny // get next char in string
+			lda (strp),y
+			beq gotlen // we reached the
+						// delimiter. Exit
+						// with the length.
+		
+			cmp #$20 // space char?
+			beq gotlen // done here.
+		
+			inc curlen // another non-space
+						// char. Increment
+			clc        // curlen and
+			bcc getlp  // continue getting
+						// chars until a
+						// space char or the
+						// delimiter is
+						// reached.
+		
+gotlen:		       // we have the length
+		
+					// restore 'y' and
+					// return
+			pla
+			tay
+			rts //  return to caller
+		
+		
+			// 
+			// 
+			// included sources follow:
+		
+			.import source "newline.sub"
+			.import source "bt.sub"
+			.import source "cls.sub"
+			// don't need it ---> .import source "conv.sub"
+			// 
+			// 
+			//  end
+		

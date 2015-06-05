@@ -4,23 +4,13 @@
 			// 
 			//  Subroutine "newline"
 			// 
-			//  increments the current line
-			//  number (variable "curlin")
+			//  Increments the current line number (variable "curlin")
+			//  Resets the curcol variable to zero and updates the screen
+			//  pointer "scnp" to the address of column zero
 			// 
-			//  resets the curcol
-			//  variable to zero
-			// 
-			//  and updates the screen
-			//  pointer "scnp" to the address
-			//  of column zero
-			// 
-			// 
-			//  This also contains separate
-			//  entry point for
-			//  Subroutine "setline", which
-			//  sets variable "scnp" to
-			//  column zero of the line
-			//  number contained in acc.
+			//  This also contains separate entry point for
+			//  Subroutine "setline", which sets variable "scnp" to
+			//  column zero of the line number contained in acc.
 			// 
 			// 
 
