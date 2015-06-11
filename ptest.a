@@ -1,35 +1,33 @@
-		// Installed git and committed this file 
-         // 
-         //    ptest
+                // Installed git and committed this file 
+                // 
+                //    ptest
+                //
+                //  temp driver program to test
+                //  pwrap.sub (Subroutine to wrap text)
+                // 
+                // 
 
-         //  temp driver program to test
-         //  pwrap.sub.
-         // 
-         // 
-
-.pc = $1000
+.pc = $1000     //  Call with "sys4096"
 		 
-jmp ptest // skip over data area
+jmp ptest       // skip over data area
 
 
-.label strp = $fb				//  String Pointer
-.label scnp = $fd 				//  Screen Pointer (video RAM)
+.label strp = $fb			//  String Pointer
+.label scnp = $fd 			//  Screen Pointer (video RAM)
 .label curlin = $a5			//  current line number
 .label curcol = $a6			//  current column number
 .label curlen = $a7			//  length of current non-space string segment
-.label savy = $a8				//  temporary storage for 'Y' register
+.label savy = $a8			//  temporary storage for 'Y' register
 
-.label vmcsb    = $d018       // VIC-II memory
-                       // control reg.
-.label plot     = $e50a       // Kernal routine
-         // to position the cursor
-wf:      .byte 0  // wrap flag for print.
-         // 
-         // if wf is set, print with
-         // word wrapping. If flag is
-         // clear, print w/o wrapping
+.label vmcsb    = $d018     // VIC-II memory control register
+.label plot     = $e50a     // Kernal routine to position the cursor
 
-dogetl:  .byte 0  // flag - do getlength
+wf:      .byte 0            // wrap flag for print.
+                            // 
+                            // if wf is set, print with word wrapping. 
+                            // if flag is clear, print w/o wrapping
+
+dogetl:  .byte 0            // flag - do getlength
 
 					
 string1:	.text "This is another test. I will put in several different strings "
@@ -41,64 +39,48 @@ string1:	.text "This is another test. I will put in several different strings "
 		 	.byte 0  // End-of-string delimiter
 
 ptest:
-         jsr bt // builld table of screen
-                // addresses for col 0
-         // NOTE: bt.sub uses strp!
+         jsr bt             // builld table of screen
+                            // addresses for col 0
+                            // NOTE: bt.sub uses strp!
 
-         lda vmcsb // vic-II control reg
+         lda vmcsb          // vic-II control reg
          ora #2
-         sta vmcsb // select uppercase/
-                   // lowercase charset
+         sta vmcsb          // select uppercase/lowercase charset
 
          lda #<string1
          sta strp
          lda #>string1
          sta strp+1
 
-         // initialize scnp pointer and
-         // curlin & curcol
+                            // initialize scnp pointer and
+                            // curlin & curcol
 
          lda #$00
          sta curlin
          sta curcol
          sta scnp
-
          lda #$04
          sta scnp+1
 
          lda #$ff
-         sta dogetl // set flag for
-             // getlen so it will be
-             // called on next non-space
+         sta dogetl         // set flag for getlen so it will be
+                            // called on next non-space
 
-         lda #$00
-         sta wf
+         lda #$00           // clear "wrap flag" (wf) so that text
+         sta wf             // will be printed w/o word wrap
+         jsr pwrap          // test printing strings not wrapped
 
-          // put random values in A, x,
-         // and y, to test that they are
-         // properly restored at end of
-         // subroutine.
-         // delete this section after
-         // testing is completed.
+         pha                // save accumulator
+         lda #$01           // set "wrap flag" (wf) so that text
+         sta wf             // will be wrapped at the end of lines
+         
+         inc curlin         // so that we have a blank line between 
+                            // previous text and new.
 
-         lda #$33
-         ldx #$dd
-         ldy #$ff
+         jsr pwrap          // test printing strings wrapped
+         pla                // get saved accumulator
+         rts                // return to calling prg
 
-
-         jsr pwrap // test printing strings not wrapped
-         pha // save accumulator
-         lda #$01
-         sta wf
-
-         inc curlin // so that we have a
-         //  blank line between previous
-         //  text and new.
-
-         jsr pwrap // test printing strings wrapped
-         pla // get saved accumulator
-         rts // return to calling prg
-
-.import source "pwrap.sub"
+.import source "pwrap.sub"  // Subroutine under test
 //
 // end of ptest.a //
