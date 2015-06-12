@@ -24,8 +24,6 @@
          	// length < 256. 
          	// 
          	// Future Mods and Projects:
-         	// ** re-write to track line number in curlin, so 
-         	//    that we don't have to resort to calculating it.  (!)
          	// 
          	// ** re-write so that 'y' index register is synchronized 
          	//    for strp and scrp pointers. For each new line, strp and scrp
