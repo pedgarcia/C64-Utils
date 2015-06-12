@@ -1,86 +1,92 @@
-                // Installed git and committed this file 
-                // 
-                //    ptest
-                //
-                //  temp driver program to test
-                //  pwrap.sub (Subroutine to wrap text)
-                // 
-                // 
+                /* 
+                     ---- ptest ----
+                
+                Temp 'driver' program to test pwrap.sub - subroutine to wrap text 
+                when writing directly to screen memory)
 
-.pc = $1000     //  Call with "sys4096"
+                See pwrap.sub for comments on use and limitations
+                 
+                */ 
+
+.pc = $1000     //  Call with "sys4096" currently. 
+                //  Relocatable code. No hard-wired addresses present.
 		 
-jmp ptest       // skip over data area
+ptest:
+            jsr bt          // build table of screen addresses for column 0
+                            // of each screen line. 
 
+                            // NOTE: bt.sub uses strp! Must save pointer
 
-.label strp = $fb			//  String Pointer
-.label scnp = $fd 			//  Screen Pointer (video RAM)
-.label curlin = $a5			//  current line number
-.label curcol = $a6			//  current column number
-.label curlen = $a7			//  length of current non-space string segment
-.label savy = $a8			//  temporary storage for 'Y' register
+            lda vmcsb       // VIC-II control register
+            ora #2
+            sta vmcsb       // select uppercase/lowercase character set
+    
+            lda #<string1   // put address of start of test string(s)
+            sta strp        // into zero-page pointer 'strp' (low byte)
+            lda #>string1   // high byte of start of string(s)
+            sta strp+1      // initialize high byte of string pointer
+    
+                            // initialize screen memory pointer 'scnp'
+                            // and other variables
+            lda #$00
+            sta curlin
+            sta curcol
+            sta scnp        // low byte of screen RAM = zero
+            lda #$04        // high byte of screen RAM ($0400)
+            sta scnp+1
+    
+// ==== Test Section: 
+
+            lda #$00        // clear "wrap flag" (wf) so that text
+            sta wf          // will be printed w/o word wrap
+            jsr pwrap       // test printing strings not wrapped
+    
+            pha             // save accumulator
+            lda #$01        // set "wrap flag" (wf) to select option to
+            sta wf          // wrap text at the end of lines
+        
+            inc curlin      // increment curlin (current screen line) 
+                            // so that we have a blank line between 
+                            // previous text block and the new one.
+            jsr pwrap       // test printing strings wrapped
+            pla             // get saved accumulator
+            rts             // return to caller     
+
+// ==== Data Area ====
+   
+                // Zero-page pointers and single-byte variables:
+
+.label strp     = $fb       // String Pointer
+.label scnp     = $fd       // Screen Pointer (video RAM)
+.label curlin   = $a5       // current line number
+.label curcol   = $a6       // current column number
+.label curlen   = $a7       // length of current non-space string segment
+.label savy     = $a8       // temporary storage for 'Y' register
+
+                // CBM Kernal registers and subroutines:
 
 .label vmcsb    = $d018     // VIC-II memory control register
 .label plot     = $e50a     // Kernal routine to position the cursor
 
-wf:      .byte 0            // wrap flag for print.
-                            // 
+                // Miscellaneous flags and registers
+
+wf:         .byte 0         // wrap flag for print.
                             // if wf is set, print with word wrapping. 
                             // if flag is clear, print w/o wrapping
 
-dogetl:  .byte 0            // flag - do getlength
+                // Text string(s)
 
-					
-string1:	.text "This is another test. I will put in several different strings "
-        	.text "to check the operation of the wrap subroutine. This line"
-        	.text " does not have leading spaces in it. Line ends here.  "
-		 	.text "Another line follows: "
-		 	.byte 13 //  Return char
-		 	.text "This line ends with a zero delimiter. Bye now!"
-		 	.byte 0  // End-of-string delimiter
+string1:    .text "This is another test. I will put in several different strings "
+            .text "to check the operation of the wrap subroutine. This line"
+            .text " does not have leading spaces in it. Line ends here.  "
+            .text "Another line follows: "
+            .text "This line ends with a zero delimiter. Bye now!"
+            .byte 0  // End-of-string delimiter
 
-ptest:
-         jsr bt             // builld table of screen
-                            // addresses for col 0
-                            // NOTE: bt.sub uses strp!
+// ==== End of Data Area ====
 
-         lda vmcsb          // vic-II control reg
-         ora #2
-         sta vmcsb          // select uppercase/lowercase charset
-
-         lda #<string1
-         sta strp
-         lda #>string1
-         sta strp+1
-
-                            // initialize scnp pointer and
-                            // curlin & curcol
-
-         lda #$00
-         sta curlin
-         sta curcol
-         sta scnp
-         lda #$04
-         sta scnp+1
-
-         lda #$ff
-         sta dogetl         // set flag for getlen so it will be
-                            // called on next non-space
-
-         lda #$00           // clear "wrap flag" (wf) so that text
-         sta wf             // will be printed w/o word wrap
-         jsr pwrap          // test printing strings not wrapped
-
-         pha                // save accumulator
-         lda #$01           // set "wrap flag" (wf) so that text
-         sta wf             // will be wrapped at the end of lines
-         
-         inc curlin         // so that we have a blank line between 
-                            // previous text and new.
-
-         jsr pwrap          // test printing strings wrapped
-         pla                // get saved accumulator
-         rts                // return to calling prg
 
 .import source "pwrap.sub"  // Subroutine under test
+
 //
-// end of ptest.a //
+// ---- end of ptest.a

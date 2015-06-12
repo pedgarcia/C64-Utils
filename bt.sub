@@ -1,22 +1,12 @@
-//  
-							//  Subroutine "bt.sub"
+							//  
+							//  ---- Subroutine "bt.sub" ----
 							// 
-							//  Build table of addresses in
-							//  RAM for screen addresses
-							//  column 0 of each line 0-24
-							// 
-							//  NOTE: uses zero-page string
-							//  pointer "strp". Call this
-							//  subroutine before using
-							//  strp to manipulate strings.
-							// 
-							// 
-							//  area for table
-
-scntbl:	.byte 0
-
-.pc = scntbl+50				// 50 bytes = 25
-							// address words
+							// Build table of addresses in RAM for 
+							// screen addresses column 0 of each line 0-24
+							//
+							// NOTE: uses zero-page string pointer "strp". 
+							// Call this subroutine before using
+							// strp to manipulate strings.
 
 bt: 
 							//  save 'y' register
@@ -67,6 +57,11 @@ out:						// restore 'y'
 		tay
 
 		rts
+
+							// area for table
+scntbl:	.byte 0
+.pc = scntbl+50				// 50 bytes = 25
+							// address words
 							// 
 							//  end Subroutine "bt.sub"
 							// 

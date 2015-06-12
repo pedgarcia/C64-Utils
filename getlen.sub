@@ -1,0 +1,40 @@
+			/* ---- Subroutine "getlen"
+
+				Finds length of string segment pointed to by strp
+				and stores it in variable 'curlen'. Considers the 
+				space character (#$20) the end-of-segment delimiter.
+
+			*/
+
+getlen:					
+			// initialize curlen to 1, since this routine is called
+			// with a non-space character starting the current string segment.
+		
+			lda #1
+			sta curlen
+		
+			// save y reg, since we'll use it to parse string..
+		
+			tya
+			pha
+		
+getlp:		
+			iny 			// get next
+			lda (strp),y	// char in string
+			beq gotlen		// if we've reached the delimiter, exit
+							// with the length.
+		
+			cmp #$20		// space char?
+			beq gotlen		// yes; done.
+		
+			inc curlen		// another non-space char. Increment
+			clc        		// curlen and continue getting chars until a
+			bcc getlp		// space char or the string delimiter (#0) is
+							// reached.
+		
+gotlen:						// we have the length restore 'y' and return
+			pla
+			tay
+			rts 			//  return to caller
+			
+			// ---- end of subroutine 'getlen'

@@ -1,8 +1,5 @@
-//  
 			// 
-			// 
-			// 
-			//  Subroutine "newline"
+			//  ---- Subroutine "newline" ----
 			// 
 			//  Increments the current line number (variable "curlin")
 			//  Resets the curcol variable to zero and updates the screen
@@ -12,46 +9,33 @@
 			//  Subroutine "setline", which sets variable "scnp" to
 			//  column zero of the line number contained in acc.
 			// 
-			// 
 
 newline: 
-			inc curlin		// curlin defined in
-			// main program
+			inc curlin		// curlin and curcol defined in main program
 
 setline: 
-			// save 'x' first
+							// save 'x' first
 			txa
 			pha
 
 			lda curlin		// get curlin in A
-			asl 			// multiply by two to get
-			// index into screen addr
-			// table
+			asl 			// multiply by two to get index into screen addr
+							// table
 
 			tax				// transfer to x index
-			lda scntbl,x	// screen table for
-			// column zero addresses
+			lda scntbl,x	// screen table for column zero addresses
 			sta scnp		// screen pointer
 			inx
 			lda scntbl,x	// high byte addr
 			sta scnp+1
-			// 
 			lda #0
-			sta curcol		// set current column
-			// variable to zero
-			// 
-			//  done - return to caller
-			// 
-			//  Restore 'x' register
+			sta curcol		// set current column variable to zero
+			
+							//  done - Restore 'x' register
+							//  and return to caller
 			pla
 			tax
-			// 
-
 			rts
-
 			// 
+			//  ---- End Subroutine "newline.sub" ----
 			// 
-			//  End Subroutine "newline.sub"
-			// 
-			// 
-
