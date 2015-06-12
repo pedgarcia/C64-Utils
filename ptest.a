@@ -47,10 +47,6 @@ ptest:
     
             pha             // save accumulator
         
-            inc curlin      // increment curlin (current screen line) 
-                            // so that we have a blank line between 
-                            // previous text block and the new one.
-
             lda #<pwr_str   // put address of start of string "pwr_str"
             sta strp        // into zero-page pointer 'strp' (low byte)
             lda #>pwr_str   // high byte of start of string(s)
