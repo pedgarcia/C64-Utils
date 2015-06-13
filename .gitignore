@@ -2,5 +2,4 @@ bin/
 *.txt
 *.out
 *.md
-*.sym
 .gitignore
