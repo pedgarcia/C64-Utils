@@ -75,17 +75,16 @@ ptest:
 .label curcol   = $a6       // current column number
 .label curlen   = $a7       // length of current non-space string segment
 .label savy     = $a8       // temporary storage for 'Y' register
+.label wf       = $a9       // wrap flag for print.
+                            // if wf is set, print with word wrapping. 
+                            // if flag is clear, print w/o wrapping
+
+
 
                 // CBM Kernal registers and subroutines:
 
 .label vmcsb    = $d018     // VIC-II memory control register
 .label plot     = $e50a     // Kernal routine to position the cursor
-
-                // Miscellaneous flags and registers
-
-wf:         .byte 0         // wrap flag for print.
-                            // if wf is set, print with word wrapping. 
-                            // if flag is clear, print w/o wrapping
 
                 // Text string(s)
 
