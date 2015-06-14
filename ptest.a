@@ -29,6 +29,8 @@ ptest:
             sta.z scnp      // low byte of screen RAM = zero
             lda #$04        // high byte of screen RAM ($0400)
             sta.z scnp+1
+
+            jsr cls         // clear the screen for testing
     
 // ==== Test Section: 
             lda #<puw_str   // put address of start of string "puw_str"
