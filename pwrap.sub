@@ -69,9 +69,7 @@ loop1:   	lda (strp),y 	// Point to char in string
 							// print current character, checking for end-of-line
 prin:
 			sta (scnp),y	// assumes char in 'A' is screencode
-			inc curcol		// update column number
-			lda curcol		// if we're at column 40, print a newline
-			cmp #$28		// column number = 40?
+			cpy #$28		// column number = 40?
 			bne prinrts		// no- print string segment w/o newline
 			jsr newline		// move cursor to next line, column zero
 							// newline also increments curlin and updates strp, 
@@ -111,7 +109,9 @@ out1:
 			.import source "newline.sub"	// prints a newline
 			.import source "bt.sub"			// builds table of column zero addresses
 			.import source "cls.sub"		// clear screen
-			.import source "getlen.sub"		// get length of current non-space string segment
+			.import source "back_spc.sub"	// back-track in string to get previous space char
+
+			// .import source "getlen.sub"		// get length of current non-space string segment
 
 			// 
 			//  ---- End of subroutine 'pwrap'

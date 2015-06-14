@@ -36,7 +36,9 @@ setline:
 			tya				// amount to update strp ('y' index)
 			clc
 			adc strp		// low byte of strp
-			sta strp
+			bcc noinchi		// we don't need to increment high byte of strp
+			inc strp+1		// increment high byte of strp
+noinchi:	sta strp
 			ldy #0			// reset 'y' register to start with zero index into strp
 			
 							//  done - Restore 'x' register
