@@ -15,7 +15,7 @@ getlen.sub -- Used by the pwrap function to wrap words to the next line, if they
 
 newline.sub -- Prints a newline. 
 
-I am interested in comments and suggestions from other programmers, especially those experienced in assembly language on the C-64, and others experienced in 6502 assembly in general. Is my code source readable?  Are the comments clear? Does my code make sense, and how can it be improved?  
+I am interested in comments and suggestions from other programmers, especially those experienced in assembly language on the C-64, and others experienced in 6502 assembly in general. Is my source code readable?  Are the comments clear? Does my code make sense, and how can it be improved?  
 
 Also, please feel free to download, or fork and modify my code.  I'd be interested to see what others might do with these routines. 
 My current setup:  current versions of Sublime Text, Kick Assembler, and VICE, running on two different laptops- Windows 7 on one, and Lubuntu Linux 15.04 on the other. I don't have any C-64 hardware now, so I'd be interested to learn if these routines run okay on actual hardware.  They run okay in VICE.  
