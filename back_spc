@@ -1,0 +1,22 @@
+//
+//  ---- Subroutine 'back_spc' ----
+//
+//  decrements string pointer to get the previous space character
+//  
+//  used by pwrap subroutine to print a string segment to the next line
+//
+//
+
+back_spc:
+
+loop1:
+			dey				// backtrack in string to find the last space
+			lda (strp),y
+			cmp #$20		// space char?
+			bne loop1		// no; continue looking
+
+gotspc:
+			rts				// (strp),y now points to last space char in string
+
+//
+// ---- end Subroutine 'back_spc'							

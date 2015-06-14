@@ -30,6 +30,14 @@ setline:
 			sta scnp+1
 			lda #0
 			sta curcol		// set current column variable to zero
+
+			// update strp to scnp so that 'y' reg is used for both strp and scnp
+
+			tya				// amount to update strp ('y' index)
+			clc
+			adc strp		// low byte of strp
+			sta strp
+			ldy #0			// reset 'y' register to start with zero index into strp
 			
 							//  done - Restore 'x' register
 							//  and return to caller

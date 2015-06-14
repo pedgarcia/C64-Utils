@@ -55,76 +55,16 @@ pwrap:   	// save registers on stack
          	jsr setline 	// uses curlin)
 
 			// sets (scnp) to column zero of line number in curlin
-
-			ldy #$ff		// index into string
+			// also sets 'y' register to zero
 
 // =================================  MAIN LOOP ============================			
 
-loop1:    	iny 			// Point to next char in string
-
-noiny:   	lda (strp),y 	// Point to char in string
+loop1:   	lda (strp),y 	// Point to char in string
 			beq out1 		// delimiter reached. Jump out.
-			cmp #$20 		// is it space char?
-			bne chkwf		// if not, print the character or string segment
-isspc:
-			jsr prin 		// char is <space>; print it.
-			clc 			
-			bcc loop1		// unconditional branch
-
-         	// check wrap flag 'wf'. Print string wrapped if flag is set.
-         	// Print string without wrap if flag is clear.
-chkwf:
-         	lda wf			// flag to print wrapped or non-wrapped
-         	bne pwrapped 	// flag is set; print wrapped
-	
-         	//  wf is clear - print entire string without word wrap.
-pnwloop:
-			lda (strp),y 	// get the current char in string
-			beq out1	 	// delimiter reached; done
-pnwc:		sty savy		// save strp's y index
-		    ldy curcol    	// index for printing current line
 			jsr prin		// print char- which also increments curcol.
-			ldy savy      	// get strp's y index back
-			iny				// increment to point to next char in string
-			bne pnwloop		// branch back and get next char (branch always)	
+			iny
+			bne loop1		// branch back and get next char (branch always)	
 
-pwrapped:
-							// flag 'wf' is set; print string segment wrapped.
-         	jsr getlen 		// get length of non-space portion of
-         	           		// current string (and store in curlen)
-chkrm:	
-         	lda curlen		// get length of current string segment and
-         	clc 			// check for space left on current line
-         	adc curcol 		// if curlen + curcol is > $28, we have 
-         					// to wrap the string segment to next line.
-	       	clc
-         	cmp #$28
-	
-         	bcc nowrap		// carry is clear, so we have room on current
-         					// line to print string segment.
-	
-yeswrap: 	// string segment would run past end of line. Print it on a
-         	// new line.
-	
-         	jsr newline		//  move cursor to the next line, on column zero
-			
-nowrap:  	ldx curlen 		//  get index for loop (set in subr. getlen)
-	
-prinlp:	
-         	// getlen did not upddate 'y' - it's still pointing to the
-         	// first non-space char in current string segment.
-
-			lda (strp),y 	// next character in string
-			sty savy		// save y reg
-			ldy curcol		// (scnp) 'y' index
-			jsr prin		// print char in A 
-			ldy savy		// get (strp) 'y' back.
-			iny 			// point to next char in string
-			dex				// index into current string segment
-			bne prinlp		// loop until done.
-
-			beq noiny 		// we're already pointing to next char in string, 
-							// so jump to main loop, skipping 'iny'
 
 							// print current character, checking for end-of-line
 prin:
@@ -134,7 +74,8 @@ prin:
 			cmp #$28		// column number = 40?
 			bne prinrts		// no- print string segment w/o newline
 			jsr newline		// move cursor to next line, column zero
-							// newline also increments curlin
+							// newline also increments curlin and updates strp, 
+							// and resets 'y' to zero
 						
 prinrts:	rts 			// return to caller
 
