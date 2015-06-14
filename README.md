@@ -1,7 +1,7 @@
 # C64-Utils
 Commodore-64 stuff.  Mostly subroutines to learn 6502 assembly language programming techniques.
 
-This is my first github repo. The first set of files is a collection of small subroutines to handle certain string functions. The main subroutine, "pwrap.sub", was written to print CBM screen codes directly to video RAM, instead of using the Kernal print routines. Optionally, pwrap prints strings with word wrap at the 40th column. 
+This is my first github repo. The first set of files is a collection of small subroutines to handle certain string functions. The main subroutine, "pwrap.sub", was written to print CBM screen codes directly to video RAM, instead of using the Kernal print routines. Optionally, pwrap prints strings with word wrap at the 40th column. [the 'pwrap' branch is currently several commits ahead of the Master branch- take a look at pwrap branch for the current versions]
 
 I also wrote a program to test pwrap.sub, called "ptest.a".  This program basically sets up the relevant variables and prints a test string twice on the C64 screen- first without word wrap, then with word wrap. "ptest.a" is the only file in the collection with a ".pc" (program counter) directive. This is the file you can assemble and run "out of the box" to see the functionality of the pwrap subroutine.  
 
