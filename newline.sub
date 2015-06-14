@@ -35,7 +35,7 @@ setline:
 			lda #0
 			sta curcol		// set current column variable to zero
 
-			// update strp to scnp so that 'y' reg is used for both strp and scnp
+			// sync strp to scnp so that 'y' reg is used for both strp and scnp
 
 upd_strp:	tya				// amount to update strp ('y' index)
 			clc

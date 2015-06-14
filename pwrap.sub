@@ -28,7 +28,15 @@
          	// ** add ability to handle strings longer than 256 bytes. 
          	//
          	// ** add ability to handle control characters such as <CR>. This will 
-         	//    assume that we're not using screen codes as the input strings. 
+         	//    probably require that we don't use screen codes for input strings. 
+         	//
+         	// ** add parameter 'numcols' instead of assuming number of 
+         	//    screen columns per line being 40. This will allow easier porting 
+         	//    to other computers with different screen sizes.
+         	//
+         	// ** also add capability to test system for location of screen RAM.
+         	//    we're currently assuming that screen ram starts at $0400
+         	//
          	// 
 
 pwrap:   	// save registers on stack
@@ -58,7 +66,7 @@ loop1:   	lda (strp),y 	// Point to current char in string
 prin:						// print current character, checking for end-of-line
 			sta (scnp),y	// assumes char in 'A' is screencode
 			cpy #$28		// column number = 40?
-			beq wftest		// yes- test flag wf for printing style
+			beq wftest		// yes- test flag wf for screen printing style
 			iny				// prep to point strp to next char in string
 			bne loop1		// branch back and get next char (branch always)	
 
