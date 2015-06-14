@@ -26,39 +26,41 @@ ptest:
             lda #$00
             sta.z curlin
             sta.z curcol
-            sta.z scnp        // low byte of screen RAM = zero
+            sta.z scnp      // low byte of screen RAM = zero
             lda #$04        // high byte of screen RAM ($0400)
             sta.z scnp+1
+
+            jsr cls         // clear the screen for testing
     
 // ==== Test Section: 
             lda #<puw_str   // put address of start of string "puw_str"
-            sta.z strp        // into zero-page pointer 'strp' (low byte)
+            sta.z strp      // into zero-page pointer 'strp' (low byte)
             lda #>puw_str   // high byte of start of string(s)
-            sta.z strp+1      // initialize high byte of string pointer
+            sta.z strp+1    // initialize high byte of string pointer
             jsr pwrap       // print the string
             
             lda #$00        // clear "wrap flag" (wf) so that text
-            sta.z wf          // will be printed w/o word wrap
+            sta.z wf        // will be printed w/o word wrap
             lda #<string1   // put address of start of test string(s)
-            sta.z strp        // into zero-page pointer 'strp' (low byte)
+            sta.z strp      // into zero-page pointer 'strp' (low byte)
             lda #>string1   // high byte of start of string(s)
-            sta.z strp+1      // initialize high byte of string pointer
+            sta.z strp+1    // initialize high byte of string pointer
             jsr pwrap       // test printing strings not wrapped
     
             pha             // save accumulator
         
             lda #<pwr_str   // put address of start of string "pwr_str"
-            sta.z strp        // into zero-page pointer 'strp' (low byte)
+            sta.z strp      // into zero-page pointer 'strp' (low byte)
             lda #>pwr_str   // high byte of start of string(s)
-            sta.z strp+1      // initialize high byte of string pointer
+            sta.z strp+1    // initialize high byte of string pointer
             jsr pwrap       // print the string
 
             lda #$01        // set "wrap flag" (wf) to select option to
-            sta.z wf          // wrap text at the end of lines
+            sta.z wf        // wrap text at the end of lines
             lda #<string1   // put address of start of test string(s)
-            sta.z strp        // into zero-page pointer 'strp' (low byte)
+            sta.z strp      // into zero-page pointer 'strp' (low byte)
             lda #>string1   // high byte of start of string(s)
-            sta.z strp+1      // initialize high byte of string pointer
+            sta.z strp+1    // initialize high byte of string pointer
 
             jsr pwrap       // test printing strings wrapped
 
@@ -92,10 +94,10 @@ puw_str:    .text "Print string unwrapped:" .byte 0
 
 pwr_str:    .text "Print string wrapped:" .byte 0
 
-string1:    .text "This is another test. I will put in several different strings "
-            .text "to check the operation of the wrap subroutine. This line"
-            .text " does not have leading spaces in it. Line ends here.  "
-            .text "Another line follows: "
+string1:    .text "Here is a test string consisting of several sentences. "
+            .text "This will check the current operation of the pwrap subroutine. "
+            .text "This should work okay with the current coding; I have been "
+            .text "testing it and troubleshooting the code. "
             .text "This line ends with a zero delimiter. Bye now!"
             .byte 0  // End-of-string delimiter
 

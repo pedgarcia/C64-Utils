@@ -5,9 +5,13 @@
 			//  Resets the curcol variable to zero and updates the screen
 			//  pointer "scnp" to the address of column zero
 			// 
-			//  This also contains separate entry point for
+			//  Also updates string pointer 'strp' so that when 'y' register
+			//  is reinitialized to zero, (strp),y points to the next char
+			//  in the string.
+			//
+			//  Contains separate entry point for
 			//  Subroutine "setline", which sets variable "scnp" to
-			//  column zero of the line number contained in acc.
+			//  column zero of the line number contained in accumulator.
 			// 
 
 newline: 
@@ -30,8 +34,18 @@ setline:
 			sta scnp+1
 			lda #0
 			sta curcol		// set current column variable to zero
+
+			// sync strp to scnp so that 'y' reg is used for both strp and scnp
+
+upd_strp:	tya				// amount to update strp ('y' index)
+			clc
+			adc strp		// low byte of strp
+			bcc noinchi		// we don't need to increment high byte of strp
+			inc strp+1		// increment high byte of strp
+noinchi:	sta strp
+			ldy #0			// reset 'y' register to start with zero index into strp
 			
-							//  done - Restore 'x' register
+							//  Done - Restore 'x' register
 							//  and return to caller
 			pla
 			tax

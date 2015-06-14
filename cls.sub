@@ -1,6 +1,6 @@
 							//   ---- Subroutine "cls.sub" ----
 							// 
-							// Fill video RAM to spaces
+							// Fill video RAM with spaces
 							// 
 cls: 
 							//  preserve 'x'

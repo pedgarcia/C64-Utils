@@ -25,17 +25,18 @@
          	// 
          	// Future Mods and Projects:
          	// 
-         	// ** re-write so that 'y' index register is synchronized 
-         	//    for strp and scrp pointers. For each new line, strp and scrp
-         	//    should both be referenced to column zero (y=0), in effect
-         	//    adding 40 to both screen and string pointers in ZP.
-			//    Y index for each line should therefore 
-         	//    be limited to range 0-39 (screen and string pointers)
-         	//
          	// ** add ability to handle strings longer than 256 bytes. 
          	//
          	// ** add ability to handle control characters such as <CR>. This will 
-         	//    assume that we're not using screen codes as the input strings. 
+         	//    probably require that we don't use screen codes for input strings. 
+         	//
+         	// ** add parameter 'numcols' instead of assuming number of 
+         	//    screen columns per line being 40. This will allow easier porting 
+         	//    to other computers with different screen sizes.
+         	//
+         	// ** also add capability to test system for location of screen RAM.
+         	//    we're currently assuming that screen ram starts at $0400
+         	//
          	// 
 
 pwrap:   	// save registers on stack
@@ -55,99 +56,54 @@ pwrap:   	// save registers on stack
          	jsr setline 	// uses curlin)
 
 			// sets (scnp) to column zero of line number in curlin
-
-			ldy #$ff		// index into string
+			// also sets 'y' register to zero
 
 // =================================  MAIN LOOP ============================			
 
-loop1:    	iny 			// Point to next char in string
 
-noiny:   	lda (strp),y 	// Point to char in string
+loop1:   	lda (strp),y 	// Point to current char in string
 			beq out1 		// delimiter reached. Jump out.
-			cmp #$20 		// is it space char?
-			bne chkwf		// if not, print the character or string segment
-isspc:
-			jsr prin 		// char is <space>; print it.
-			clc 			
-			bcc loop1		// unconditional branch
-
-         	// check wrap flag 'wf'. Print string wrapped if flag is set.
-         	// Print string without wrap if flag is clear.
-chkwf:
-         	lda wf			// flag to print wrapped or non-wrapped
-         	bne pwrapped 	// flag is set; print wrapped
-	
-         	//  wf is clear - print entire string without word wrap.
-pnwloop:
-			lda (strp),y 	// get the current char in string
-			beq out1	 	// delimiter reached; done
-pnwc:		sty savy		// save strp's y index
-		    ldy curcol    	// index for printing current line
-			jsr prin		// print char- which also increments curcol.
-			ldy savy      	// get strp's y index back
-			iny				// increment to point to next char in string
-			bne pnwloop		// branch back and get next char (branch always)	
-
-pwrapped:
-							// flag 'wf' is set; print string segment wrapped.
-         	jsr getlen 		// get length of non-space portion of
-         	           		// current string (and store in curlen)
-chkrm:	
-         	lda curlen		// get length of current string segment and
-         	clc 			// check for space left on current line
-         	adc curcol 		// if curlen + curcol is > $28, we have 
-         					// to wrap the string segment to next line.
-	       	clc
-         	cmp #$28
-	
-         	bcc nowrap		// carry is clear, so we have room on current
-         					// line to print string segment.
-	
-yeswrap: 	// string segment would run past end of line. Print it on a
-         	// new line.
-	
-         	jsr newline		//  move cursor to the next line, on column zero
-			
-nowrap:  	ldx curlen 		//  get index for loop (set in subr. getlen)
-	
-prinlp:	
-         	// getlen did not upddate 'y' - it's still pointing to the
-         	// first non-space char in current string segment.
-
-			lda (strp),y 	// next character in string
-			sty savy		// save y reg
-			ldy curcol		// (scnp) 'y' index
-			jsr prin		// print char in A 
-			ldy savy		// get (strp) 'y' back.
-			iny 			// point to next char in string
-			dex				// index into current string segment
-			bne prinlp		// loop until done.
-
-			beq noiny 		// we're already pointing to next char in string, 
-							// so jump to main loop, skipping 'iny'
-
-							// print current character, checking for end-of-line
-prin:
+prin:						// print current character, checking for end-of-line
 			sta (scnp),y	// assumes char in 'A' is screencode
-			inc curcol		// update column number
-			lda curcol		// if we're at column 40, print a newline
-			cmp #$28		// column number = 40?
-			bne prinrts		// no- print string segment w/o newline
+			cpy #$28		// column number = 40?
+			beq wftest		// yes- test flag wf for screen printing style
+			iny				// prep to point strp to next char in string
+			bne loop1		// branch back and get next char (branch always)	
+
+
+wftest:						// test flag 'wf' for wrap or no wrap printing
+			lda wf 			// wf = wrap flag for printing wrap or no-wrap
+			beq nowrap		// print without word wrap
+
+wrap:						// print with word wrap
+			jsr back_spc	// find previous space char and point strp to it.
+			tya
+			pha				// save 'y' register, and 
+			lda #$20		// fill the rest of the line with spaces
+fillspc:	
+			sta (scnp),y 	// store a space char at current screen location
+			iny
+			cpy #$28		// are we at end of the line yet?
+			bne fillspc		// no; keep going
+			pla
+			tay 			// restore 'y' so it points to next char in string			
+			iny 			// print newline and zero 'y' register
+nowrap:
 			jsr newline		// move cursor to next line, column zero
-							// newline also increments curlin
-						
-prinrts:	rts 			// return to caller
+							// newline also increments curlin and updates strp, 
+							// and resets 'y' to zero
+			jmp loop1		// jump back to loop and print more
 
 
 out1:
 			jsr newline		// add a blank line after the text block
 			
 			// use Kernal routine "PLOT" to set cursor position to one
-			// line past the printed string, before returning to BASIC.
+			// line past the printed string, before returning to caller.
 			
 			ldy #0			// curlin column number for PLOT routine
 			
-			inc curlin 		//  one row down
+			inc curlin 		// one row down
 			ldx curlin 		// row position
 			clc 			// clc to write cursor position
 			jsr plot 		// call Kernal subroutine to position cursor
@@ -170,7 +126,9 @@ out1:
 			.import source "newline.sub"	// prints a newline
 			.import source "bt.sub"			// builds table of column zero addresses
 			.import source "cls.sub"		// clear screen
-			.import source "getlen.sub"		// get length of current non-space string segment
+			.import source "back_spc.sub"	// back-track in string to get previous space char
+
+			// .import source "getlen.sub"		// get length of current non-space string segment
 
 			// 
 			//  ---- End of subroutine 'pwrap'
