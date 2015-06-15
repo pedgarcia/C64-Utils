@@ -30,12 +30,9 @@
          	// ** add ability to handle control characters such as <CR>. This will 
          	//    probably require that we don't use screen codes for input strings. 
          	//
-         	// ** add parameter 'numcols' instead of assuming number of 
-         	//    screen columns per line being 40. This will allow easier porting 
-         	//    to other computers with different screen sizes.
-         	//
-         	// ** also add capability to test system for location of screen RAM.
-         	//    we're currently assuming that screen ram starts at $0400
+         	// ** also add capability to test system for location of screen RAM, 
+         	//    and use that instead of a hard-wired location.
+         	//    (we're currently assuming that screen ram starts at $0400)
          	//
          	// 
 
@@ -65,9 +62,8 @@ loop1:   	lda (strp),y 	// Point to current char in string
 			beq out1 		// delimiter reached. Jump out.
 prin:						// print current character, checking for end-of-line
 			sta (scnp),y	// assumes char in 'A' is screencode
-			cpy #$28		// column number = 40?
-			beq wftest		// yes- test flag wf for screen printing style
 			iny				// prep to point strp to next char in string
+			cpy #NUMCOLS	// column number = last column on line?
 			bne loop1		// branch back and get next char (branch always)	
 
 
@@ -77,20 +73,21 @@ wftest:						// test flag 'wf' for wrap or no wrap printing
 
 wrap:						// print with word wrap
 			jsr back_spc	// find previous space char and point strp to it.
-			tya
-			pha				// save 'y' register, and 
-			lda #$20		// fill the rest of the line with spaces
+			tya 			// 'y' is index to start position in screen line to
+			pha				// be blanked. Save it as a placeholder for when
+							// we continue printing the string on next line.
+loadspc: 	lda #$20		// fill the rest of the line with spaces
 fillspc:	
 			sta (scnp),y 	// store a space char at current screen location
-			iny
-			cpy #$28		// are we at end of the line yet?
+			iny				// point to next screen location
+			cpy #NUMCOLS	// are we at end of the line yet?
 			bne fillspc		// no; keep going
-			pla
-			tay 			// restore 'y' so it points to next char in string			
-			iny 			// print newline and zero 'y' register
+			pla				// restore 'y' so we have index into current char in string
+			tay 			// 
+			iny 			// increment 'y' so that it points to next char in string	
 nowrap:
 			jsr newline		// move cursor to next line, column zero
-							// newline also increments curlin and updates strp, 
+							// newline also increments curlin, updates strp, 
 							// and resets 'y' to zero
 			jmp loop1		// jump back to loop and print more
 

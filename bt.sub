@@ -28,7 +28,7 @@ btloop:	cpy #$30			// done 24 addresses?
 		beq out				// yes- jump out
 		lda (strp),y			// low byte
 		clc
-		adc #40
+		adc #$28			// decimal 40
 		iny
 		iny
 		sta (strp),y			// next addr

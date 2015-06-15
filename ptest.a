@@ -33,6 +33,9 @@ ptest:
             jsr cls         // clear the screen for testing
     
 // ==== Test Section: 
+
+                            // Print string unwrapped:
+
             lda #<puw_str   // put address of start of string "puw_str"
             sta.z strp      // into zero-page pointer 'strp' (low byte)
             lda #>puw_str   // high byte of start of string(s)
@@ -46,9 +49,9 @@ ptest:
             lda #>string1   // high byte of start of string(s)
             sta.z strp+1    // initialize high byte of string pointer
             jsr pwrap       // test printing strings not wrapped
-    
-            pha             // save accumulator
-        
+
+                            // Print string wrapped:
+
             lda #<pwr_str   // put address of start of string "pwr_str"
             sta.z strp      // into zero-page pointer 'strp' (low byte)
             lda #>pwr_str   // high byte of start of string(s)
@@ -64,10 +67,14 @@ ptest:
 
             jsr pwrap       // test printing strings wrapped
 
-            pla             // restore accumulator
             rts             // return to caller     
 
 // ==== Data Area ====
+
+                // System-specific constants:
+
+.label NUMCOLS  = 40        // number of colums per screen line (C-64)
+.label NUMROWS  = 25        // number of rows on screen (C-64)
    
                 // Zero-page pointers and single-byte variables:
 
@@ -94,11 +101,12 @@ puw_str:    .text "Print string unwrapped:" .byte 0
 
 pwr_str:    .text "Print string wrapped:" .byte 0
 
-string1:    .text "Here is a test string consisting of several sentences. "
+string1:    .text "Here is a long test string consisting of several "
+            .text "sentences, and ending with a zero delimiter. "
             .text "This will check the current operation of the pwrap subroutine. "
             .text "This should work okay with the current coding; I have been "
             .text "testing it and troubleshooting the code. "
-            .text "This line ends with a zero delimiter. Bye now!"
+            .text "Bye for now!"
             .byte 0  // End-of-string delimiter
 
 // ==== End of Data Area ====
