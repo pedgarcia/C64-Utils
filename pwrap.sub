@@ -1,40 +1,40 @@
 
 // ==================================================
-// 
+//
 //   Subroutine "pwrap.sub"
-// 
+//
 // ==================================================
 
-         	// 
+         	//
          	// Prints a string to screen
          	// using direct writing to video memory.
          	//
-         	// Zero-page pointers 'strp' (string pointer) and 'scnp' 
+         	// Zero-page pointers 'strp' (string pointer) and 'scnp'
          	// (screen pointer) are defined in calling program.
          	//
          	// For newline, routine advances 'scnp' to point to column zero
          	// of next line (also updates variables curlin & curcol)
          	//
-         	// also (optionally) wraps a word to the next line 
+         	// also (optionally) wraps a word to the next line
          	// if it would run past the last column on the line.
          	// (determined by flag 'wf' set in calling program)
          	//
          	// NOTE:  this and other string-handling subroutines in this
          	// collection are currently limited to processing strings of
-         	// length < 256. 
-         	// 
+         	// length < 256.
+         	//
          	// Future Mods and Projects:
-         	// 
-         	// ** add ability to handle strings longer than 256 bytes. 
          	//
-         	// ** add ability to handle control characters such as <CR>. This will 
-         	//    probably require that we don't use screen codes for input strings. 
+         	// ** add ability to handle strings longer than 256 bytes.
          	//
-         	// ** also add capability to test system for location of screen RAM, 
+         	// ** add ability to handle control characters such as <CR>. This will
+         	//    probably require that we don't use screen codes for input strings.
+         	//
+         	// ** also add capability to test system for location of screen RAM,
          	//    and use that instead of a hard-wired location.
          	//    (we're currently assuming that screen ram starts at $0400)
          	//
-         	// 
+         	//
 
 pwrap:   	// save registers on stack
 
@@ -55,16 +55,16 @@ pwrap:   	// save registers on stack
 			// sets (scnp) to column zero of line number in curlin
 			// also sets 'y' register to zero
 
-// =================================  MAIN LOOP ============================			
+// =================================  MAIN LOOP ============================
 
 
 loop1:   	lda (strp),y 	// Point to current char in string
 			beq out1 		// delimiter reached. Jump out.
-prin:						// print current character, checking for end-of-line
+prin:						// print current character
 			sta (scnp),y	// assumes char in 'A' is screencode
-			iny				// prep to point strp to next char in string
-			cpy #NUMCOLS	// column number = last column on line?
-			bne loop1		// branch back and get next char (branch always)	
+			iny				// prep to point to next char in string
+			cpy #NUMCOLS	// NUMCOLS is one column past the last column on line
+			bne loop1		// branch back and get next char (branch always)
 
 
 wftest:						// test flag 'wf' for wrap or no wrap printing
@@ -77,49 +77,50 @@ wrap:						// print with word wrap
 			pha				// be blanked. Save it as a placeholder for when
 							// we continue printing the string on next line.
 loadspc: 	lda #$20		// fill the rest of the line with spaces
+
 fillspc:	
 			sta (scnp),y 	// store a space char at current screen location
 			iny				// point to next screen location
 			cpy #NUMCOLS	// are we at end of the line yet?
 			bne fillspc		// no; keep going
 			pla				// restore 'y' so we have index into current char in string
-			tay 			// 
-			iny 			// increment 'y' so that it points to next char in string	
+			tay 			//
+			iny 			// increment 'y' so that it points to next char in string
 nowrap:
 			jsr newline		// move cursor to next line, column zero
-							// newline also increments curlin, updates strp, 
+							// newline also increments curlin, updates strp,
 							// and resets 'y' to zero
 			jmp loop1		// jump back to loop and print more
 
 
 out1:
 			jsr newline		// add a blank line after the text block
-			
+
 			// use Kernal routine "PLOT" to set cursor position to one
 			// line past the printed string, before returning to caller.
-			
+
 			ldy #0			// curlin column number for PLOT routine
-			
+
 			inc curlin 		// one row down
 			ldx curlin 		// row position
 			clc 			// clc to write cursor position
 			jsr plot 		// call Kernal subroutine to position cursor
-			
+
 			//  restore registers A, x and y from stack
 			pla
 			tay
 			pla
 			tax
 			pla
-			
+
 			rts 			// return to caller
-			
-			// 
+
+			//
 			//  end Subroutine "pwrap.sub"
-			// 
-			// 
+			//
+			//
 			// required subroutine sources follow:
-		
+
 			.import source "newline.sub"	// prints a newline
 			.import source "bt.sub"			// builds table of column zero addresses
 			.import source "cls.sub"		// clear screen
@@ -127,6 +128,5 @@ out1:
 
 			// .import source "getlen.sub"		// get length of current non-space string segment
 
-			// 
+			//
 			//  ---- End of subroutine 'pwrap'
-		

@@ -3,7 +3,7 @@ Commodore-64 stuff.  Mostly subroutines for experimentation, as I learn 6502/651
 
 Latest updates at GitHub: https://github.com/DougBrunelle/C64-Utils
 
-This is my first github repo. Thhis set of files is a collection of small subroutines to handle certain text string functions. 
+This is my first github repo. This set of files is a collection of small subroutines to handle certain text string functions. 
 
 The main subroutine, "pwrap.sub", was designed to write CBM screen codes directly to video RAM, instead of using the Kernal print routines. Optionally, pwrap prints strings with word wrap at the 40th column. 
 
@@ -23,7 +23,7 @@ I am interested in comments and suggestions from other programmers, especially t
 
 Also, please feel free to download and hack my code.  I'd be interested to see what others might do with these routines. I will look at pull requests and merge your work into the repository, if I think your mods/improvements are useful. If you do so, please be generous with the comments in your code.
 
-My current setup:  Sublime Text, Kick Assembler, and VICE, running on two different laptops- Windows 7 on one, and Lubuntu Linux 15.04 on the other. I don't have any C-64 hardware now, so I'd be interested to learn how these routines run on actual hardware.  They run okay in VICE (when I'm not busy breaking them to make them better! :-).  
+My current setup:  Atom editor, Kick Assembler, and VICE Commodore emulator, running on two different laptops- Windows 7 on one, and Lubuntu Linux 15.04 on the other. I don't have any C-64 hardware at this time, so I'd be interested to learn how these routines run on actual hardware.  They run okay in VICE (when I'm not busy breaking them to make them better! :-).  
 
 --Doug Brunelle -- 
 San Diego, CA
