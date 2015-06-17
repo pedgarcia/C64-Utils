@@ -1,55 +1,55 @@
-							//  
+							//
 							//  ---- Subroutine "bt.sub" ----
-							// 
-							// Build table of addresses in RAM for 
+							//
+							// Build table of addresses in RAM for
 							// screen addresses column 0 of each line 0-24
 							//
-							// NOTE: uses zero-page string pointer "strp". 
+							// NOTE: uses zero-page string pointer "strp".
 							// Call this subroutine before using
 							// strp to manipulate strings.
 
-bt: 
+bt:
 							//  save 'y' register
 		tya
 		pha
 
 		ldy #$00			// pointer index
-		lda #<scntbl
-		sta strp
-		lda #>scntbl
-		sta strp+1
+		lda #<scntbl		// low byte of first zero-column screen address
+		sta strp			// load into zero-page pointer strp
+		lda #>scntbl		// high byte of first zero-column screen address
+		sta strp+1			// load into strp high byte
 
-		lda #0				// start of scntble
-		sta scntbl			// low byte
-		lda #4
-		sta scntbl+1			// high byte
+		lda #0				// base address of screen memory, low byte
+		sta scntbl			// store into first address in screen table
+		lda #4				// base address of screen memory, high byte
+		sta scntbl+1		// store into high byte, first address in screen table
 
 btloop:	cpy #$30			// done 24 addresses?
 		beq out				// yes- jump out
-		lda (strp),y			// low byte
+		lda (strp),y		// low byte
 		clc
-		adc #$28			// decimal 40
-		iny
-		iny
-		sta (strp),y			// next addr
-		bcs incrhi			// incr. high byte
-		// 
-		dey					// point to high byte
-		lda (strp),y			// prev. addr
-		iny
-		iny
-		sta (strp),y			// next addr
+		adc #$28			// add one line's worth of column addresses, to get
+		iny					// the address for column zero of next screen line
+		iny					// iny twice to point to the low byte of next entry
+		sta (strp),y		// in screen table
+		bcs incrhi			// if carry set, increment high byte of address
+							// no increment of high byte needed
+		dey					// point to high byte of previous address
+		lda (strp),y		// load high byte (same as last table entry)
+		iny					// iny twice to point to the high byte of the
+		iny					// next table entry
+		sta (strp),y		// store into high byte of this table entry
 		dey					// point back to low byte of address
-		bcc btloop
+		bcc btloop			// go back and to another table entry
 
-incrhi:	dey					// point to high byte
-		lda (strp),y
-		iny
-		iny
+incrhi:	dey					// low-byte addition resulted in carry set, so
+		lda (strp),y		// we have to increment the high byte of the
+		iny					// screen address
+		iny					// iny twice to point to table entry, high byte
 		clc
 		adc #1				// increment it.
-		sta (strp),y
-		dey
+		sta (strp),y		// store it into table entry for the high byte
+		dey					// point back to low byte of this table entry
 		bcc btloop			// do more
 
 out:						// restore 'y'
@@ -62,7 +62,6 @@ out:						// restore 'y'
 scntbl:	.byte 0
 .pc = scntbl+50				// 50 bytes = 25
 							// address words
-							// 
+							//
 							//  end Subroutine "bt.sub"
-							// 
-
+							//

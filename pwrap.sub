@@ -78,7 +78,7 @@ wrap:						// print with word wrap
 							// we continue printing the string on next line.
 loadspc: 	lda #$20		// fill the rest of the line with spaces
 
-fillspc:	
+fillspc:
 			sta (scnp),y 	// store a space char at current screen location
 			iny				// point to next screen location
 			cpy #NUMCOLS	// are we at end of the line yet?

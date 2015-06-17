@@ -1,26 +1,27 @@
-                /* 
+/*==============================================================
+
                      ---- ptest ----
-                
-                Temp 'driver' program to test pwrap.sub - subroutine to wrap text 
+
+                Temp 'driver' program to test pwrap.sub - subroutine to wrap text
                 when writing directly to screen memory)
 
                 See pwrap.sub for comments on use and limitations
-                 
-                */ 
 
-.pc = $1000     //  Call with "sys4096" currently. 
+                */
+
+.pc = $1000     //  Call with "sys4096" currently.
                 //  Relocatable code. No hard-wired addresses present.
-		 
+
 ptest:
             jsr bt          // build table of screen addresses for column 0
-                            // of each screen line. 
+                            // of each screen line.
 
                             // NOTE: bt.sub uses strp! Must save pointer
 
             lda vmcsb       // VIC-II control register
             ora #2
             sta vmcsb       // select uppercase/lowercase character set
-    
+
                             // initialize screen memory pointer 'scnp'
                             // and other variables
             lda #$00
@@ -31,8 +32,8 @@ ptest:
             sta.z scnp+1
 
             jsr cls         // clear the screen for testing
-    
-// ==== Test Section: 
+
+// ==== Test Section:
 
                             // Print string unwrapped:
 
@@ -41,7 +42,7 @@ ptest:
             lda #>puw_str   // high byte of start of string(s)
             sta.z strp+1    // initialize high byte of string pointer
             jsr pwrap       // print the string
-            
+
             lda #$00        // clear "wrap flag" (wf) so that text
             sta.z wf        // will be printed w/o word wrap
             lda #<string1   // put address of start of test string(s)
@@ -67,7 +68,7 @@ ptest:
 
             jsr pwrap       // test printing strings wrapped
 
-            rts             // return to caller     
+            rts             // return to caller
 
 // ==== Data Area ====
 
@@ -75,7 +76,7 @@ ptest:
 
 .label NUMCOLS  = 40        // number of colums per screen line (C-64)
 .label NUMROWS  = 25        // number of rows on screen (C-64)
-   
+
                 // Zero-page pointers and single-byte variables:
 
 .label strp     = $fb       // String Pointer
@@ -85,7 +86,7 @@ ptest:
 .label curlen   = $a7       // length of current non-space string segment
 .label savy     = $a8       // temporary storage for 'Y' register
 .label wf       = $a9       // wrap flag for print.
-                            // if wf is set, print with word wrapping. 
+                            // if wf is set, print with word wrapping.
                             // if flag is clear, print w/o wrapping
 
 
