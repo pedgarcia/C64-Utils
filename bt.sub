@@ -9,12 +9,9 @@
 				// strp to manipulate strings.
 
 bt:
-				//  save 'y' register
-		tya
-		pha
 		ldy #$00	// pointer index for strp
 		
-		lda #LMargin	// Left margin variable
+		lda LMargin	// Left margin variable
 		sta scntbl	// first address in screen table, low byte
 		lda #$04        // high byte of screen RAM ($04xx)
 		sta scntbl+1	// first address in screen table, high byte
@@ -55,9 +52,6 @@ incrhi:
 		bcc btloop	// do more
 
 out:						
-				// restore 'y'
-		pla
-		tay
 				// Return to caller
 		rts
 

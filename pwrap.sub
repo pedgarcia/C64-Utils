@@ -45,7 +45,7 @@ pwrap:
 		tya
 		pha
 
-         	lda #LMargin
+         	lda LMargin	// load Left Margin from variable
          	sta curcol	// start on column (LMargin)
 
          	jsr setline 	// uses curlin)
@@ -60,7 +60,7 @@ loop1:   	lda (strp),y 	// Point to current char in string
 prin:				// print current character
 		sta (scnp),y	// assumes char in 'A' is screencode
 		iny		// prep to point to next char in string
-		cpy #LASTCOL	// LASTCOL is actually one column past the last column on line
+		cpy LASTCOL	// LASTCOL is actually one column past the last column on line
 		bne loop1	// branch back and get next char (branch always)
 
 
@@ -78,7 +78,7 @@ loadspc: 	lda #$20	// fill the rest of the line with spaces
 fillspc:
 		sta (scnp),y 	// store a space char at current screen location
 		iny		// point to next screen location
-		cpy #LASTCOL	// are we past end of the line yet?
+		cpy LASTCOL	// are we past end of the line yet?
 		bne fillspc	// no; keep going
 		pla		// restore 'y' so we have index into current char in string
 		tay 		//

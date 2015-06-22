@@ -13,6 +13,15 @@
 				//  Relocatable code. No hard-wired addresses present.
 
 ptest:
+		lda #NUMCOLS	// NUMCOLS = total screen columns, not including margins
+		sec		
+		sbc LMargin	// Subtract Left Margin value from total columns
+		sbc RMargin	// Subtract Right Margin value from total columns
+		sta LASTCOL	// and store into LASTCOL
+				// Left Margin (LMargin) value is used to set the coulumn
+				// pointer (scnp) for building screen address table.
+		
+		
 		jsr bt          // build table of screen addresses for column LMargin
 				// of each screen line.
 
@@ -27,13 +36,13 @@ ptest:
 		lda #$00
 		sta.z curlin
 		sta.z curcol
+		tay		// set pointer index to zero
 
 		jsr cls         // clear the screen for testing
 
 				// ==== Test Section:
 				
 		// Print description string wrapped: 		
-		
 		lda #$01        // set "wrap flag" (wf) to select option to
 		sta.z wf        // wrap text at the end of lines
 		lda #<puw_str   // put address of start of string "puw_str"
@@ -78,11 +87,6 @@ ptest:
 
 .label NUMCOLS  = 40        	// number of colums per screen line (C-64)
 .label NUMROWS  = 25        	// number of rows on screen (C-64)
-.label LMargin	= 15		// left margin for screen printing
-.label RMargin	= 0		// right margin for screen printing
-.label LASTCOL	= NUMCOLS-LMargin	// Last column adjusts for Left Margin
-
-
 
 				// Zero-page pointers and single-byte variables:
 
@@ -109,14 +113,21 @@ puw_str:    	.text "Print string unwrapped:" .byte 0
 
 pwr_str:    	.text "Print string wrapped:" .byte 0
 
-string1:    	.text "Here is a long test string consisting of several "
+string1:    	.text "Here is a long test string consisting of a few "
 		.text "sentences, and ending with a zero delimiter. "
 		.text "This will check the current operation of the pwrap subroutine. "
-/*		.text "This should work okay with the current coding; I have been "
-		.text "testing it and troubleshooting the code. "
+		.text "Recently Added: Left and Right Margins."
+/*		.text "I have been testing it and troubleshooting the code. "
 		.text "Bye for now!"
 		*/
 		.byte 0  	// End-of-string delimiter
+
+				// Misc. constants and non-zero-page variables
+
+LMargin: 	.byte 6		// left margin for screen printing (in characters)
+RMargin: 	.byte 6		// right margin for screen printing (in characters)
+LASTCOL:	.byte 0		// Last column = NUMCOLS - LMargin
+				
 
 				// ==== End of Data Area ====
 
