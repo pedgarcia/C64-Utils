@@ -1,28 +1,28 @@
-							//   ---- Subroutine "cls.sub" ----
-							//
-							// Fill video RAM with spaces
-							//
+				//   ---- Subroutine "cls.sub" ----
+				//
+				// Fill video RAM with spaces
+				//
 cls:
-							//  preserve 'x'
-			txa
-			pha
+				//  preserve 'x'
+		txa
+		pha
 
-			ldx #$00
+		ldx #$00
 
-clear:		lda #$20		// space char
-			sta $0400,x
-			sta $0500,x
-			sta $0600,x
-			sta $06e8,x
-			inx
-			bne clear		// Has x reached zero? If not, continue in loop
+clear:		lda #$20	// space char
+		sta $0400,x
+		sta $0500,x
+		sta $0600,x
+		sta $06e8,x
+		inx
+		bne clear	// Has x reached zero? If not, continue in loop
 
-			//  restore 'x'
-			pla
-			tax
+				//  restore 'x'
+		pla
+		tax
 
-			rts				//  return
-							//
-							//
-							// ---- End Subroutine "cls.sub" ----
-							//
+		rts		//  return
+				//
+				//
+				// ---- End Subroutine "cls.sub" ----
+				//

@@ -1,132 +1,129 @@
 
-// ==================================================
-//
-//   Subroutine "pwrap.sub"
-//
-// ==================================================
+				// ==================================================
+				//
+				//   Subroutine "pwrap.sub"
+				//
+				// ==================================================
 
-         	//
-         	// Prints a string to screen
-         	// using direct writing to video memory.
-         	//
-         	// Zero-page pointers 'strp' (string pointer) and 'scnp'
-         	// (screen pointer) are defined in calling program.
-         	//
-         	// For newline, routine advances 'scnp' to point to column zero
-         	// of next line (also updates variables curlin & curcol)
-         	//
-         	// also (optionally) wraps a word to the next line
-         	// if it would run past the last column on the line.
-         	// (determined by flag 'wf' set in calling program)
-         	//
-         	// NOTE:  this and other string-handling subroutines in this
-         	// collection are currently limited to processing strings of
-         	// length < 256.
-         	//
-         	// Future Mods and Projects:
-         	//
-         	// ** add ability to handle strings longer than 256 bytes.
-         	//
-         	// ** add ability to handle control characters such as <CR>. This will
-         	//    probably require that we don't use screen codes for input strings.
-         	//
-         	// ** also add capability to test system for location of screen RAM,
-         	//    and use that instead of a hard-wired location.
-         	//    (we're currently assuming that screen ram starts at $0400)
-         	//
-         	//
+				//
+				// Prints a string to screen
+				// using direct writing to video memory.
+				//
+				// Zero-page pointers 'strp' (string pointer) and 'scnp'
+				// (screen pointer) are defined in calling program.
+				//
+				// For newline, routine advances 'scnp' to point to column (LMargin)
+				// of next line (also updates variables curlin & curcol)
+				//
+				// also (optionally) wraps a word to the next line
+				// if it would run past the last column on the line.
+				// (determined by flag 'wf' set in calling program)
+				//
+				// NOTE:  this and other string-handling subroutines in this
+				// collection are currently limited to processing strings of
+				// length < 256.
+				//
+				// Future Mods and Projects:
+				//
+				// ** add ability to handle strings longer than 256 bytes.
+				//
+				// ** add ability to handle control characters such as <CR>. This will
+				//    probably require that we don't use screen codes for input strings.
+				//
+				// ** also add capability to test system for location of screen RAM,
+				//    and use that instead of a hard-wired location.
+				//    (we're currently assuming that screen ram starts at $0400)
+				//
+				//
 
-pwrap:   	// save registers on stack
+pwrap:   	
+				// save registers on stack
 
-         	pha
-         	txa
-         	pha
-         	tya
-         	pha
+		pha
+		txa
+		pha
+		tya
+		pha
 
-         	lda #0
-         	sta curcol		// start on column 0
-
-         	// get screen address for column zero of current row
-         	// and initialize variables
+         	lda #LMargin
+         	sta curcol	// start on column (LMargin)
 
          	jsr setline 	// uses curlin)
+				// sets (scnp) to column (LMargin) of line number in curlin
+				// also sets 'y' register to zero
 
-			// sets (scnp) to column zero of line number in curlin
-			// also sets 'y' register to zero
-
-// =================================  MAIN LOOP ============================
+		// =================================  MAIN LOOP ============================
 
 
 loop1:   	lda (strp),y 	// Point to current char in string
-			beq out1 		// delimiter reached. Jump out.
-prin:						// print current character
-			sta (scnp),y	// assumes char in 'A' is screencode
-			iny				// prep to point to next char in string
-			cpy #NUMCOLS	// NUMCOLS is one column past the last column on line
-			bne loop1		// branch back and get next char (branch always)
+		beq out1 	// delimiter reached. Jump out.
+prin:				// print current character
+		sta (scnp),y	// assumes char in 'A' is screencode
+		iny		// prep to point to next char in string
+		cpy #LASTCOL	// LASTCOL is actually one column past the last column on line
+		bne loop1	// branch back and get next char (branch always)
 
 
-wftest:						// test flag 'wf' for wrap or no wrap printing
-			lda wf 			// wf = wrap flag for printing wrap or no-wrap
-			beq nowrap		// print without word wrap
+wftest:				// test flag 'wf' for wrap or no wrap printing
+		lda wf 		// wf = wrap flag for printing wrap or no-wrap
+		beq nowrap	// print without word wrap
 
-wrap:						// print with word wrap
-			jsr back_spc	// find previous space char and point strp to it.
-			tya 			// 'y' is index to start position in screen line to
-			pha				// be blanked. Save it as a placeholder for when
-							// we continue printing the string on next line.
-loadspc: 	lda #$20		// fill the rest of the line with spaces
+wrap:				// print with word wrap
+		jsr back_spc	// find previous space char and point strp to it.
+		tya 		// 'y' is index to start position in screen line to
+		pha		// be blanked. Save it as a placeholder for when
+				// we continue printing the string on next line.
+loadspc: 	lda #$20	// fill the rest of the line with spaces
 
 fillspc:
-			sta (scnp),y 	// store a space char at current screen location
-			iny				// point to next screen location
-			cpy #NUMCOLS	// are we at end of the line yet?
-			bne fillspc		// no; keep going
-			pla				// restore 'y' so we have index into current char in string
-			tay 			//
-			iny 			// increment 'y' so that it points to next char in string
+		sta (scnp),y 	// store a space char at current screen location
+		iny		// point to next screen location
+		cpy #LASTCOL	// are we past end of the line yet?
+		bne fillspc	// no; keep going
+		pla		// restore 'y' so we have index into current char in string
+		tay 		//
+		iny 		// increment 'y' so that it points to next char in string
 nowrap:
-			jsr newline		// move cursor to next line, column zero
-							// newline also increments curlin, updates strp,
-							// and resets 'y' to zero
-			jmp loop1		// jump back to loop and print more
+		jsr newline	// move cursor to next line, column (LMargin)
+				// newline also increments curlin, updates strp,
+				// and resets 'y' to zero
+		jmp loop1	// jump back to loop and print more
 
 
 out1:
-			jsr newline		// add a blank line after the text block
+		jsr newline	// add a blank line after the text block
 
-			// use Kernal routine "PLOT" to set cursor position to one
-			// line past the printed string, before returning to caller.
+				// use Kernal routine "PLOT" to set cursor position to one
+				// line past the printed string, before returning to caller.
 
-			ldy #0			// curlin column number for PLOT routine
+		ldy #0		// curlin column number for PLOT routine
 
-			inc curlin 		// one row down
-			ldx curlin 		// row position
-			clc 			// clc to write cursor position
-			jsr plot 		// call Kernal subroutine to position cursor
+		inc curlin 	// one row down
+		ldx curlin 	// row position
+		clc 		// clc to write cursor position
+		jsr plot 	// call Kernal subroutine to position cursor
 
-			//  restore registers A, x and y from stack
-			pla
-			tay
-			pla
-			tax
-			pla
+				//  restore registers A, x and y from stack
+		pla
+		tay
+		pla
+		tax
+		pla
 
-			rts 			// return to caller
+		rts 		// return to caller
 
-			//
-			//  end Subroutine "pwrap.sub"
-			//
-			//
-			// required subroutine sources follow:
+				//
+				//  end Subroutine "pwrap.sub"
+				//
+				//
+				// required subroutine sources follow:
 
-			.import source "newline.sub"	// prints a newline
-			.import source "bt.sub"			// builds table of column zero addresses
-			.import source "cls.sub"		// clear screen
-			.import source "back_spc.sub"	// back-track in string to get previous space char
+.import source "newline.sub"	// prints a newline
+.import source "bt.sub"		// builds table of column (LMargin) addresses
+.import source "cls.sub"	// clear screen
+.import source "back_spc.sub"	// back-track in string to get previous space char
 
-			// .import source "getlen.sub"		// get length of current non-space string segment
-
-			//
-			//  ---- End of subroutine 'pwrap'
+				// .import source "getlen.sub"		
+				// get length of current non-space string segment
+				
+				//  ---- End of subroutine 'pwrap'

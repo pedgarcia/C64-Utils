@@ -1,55 +1,57 @@
-			// 
-			//  ---- Subroutine "newline" ----
-			//
-			//  Increments the current line number (variable "curlin")
-			//  Resets the curcol variable to zero and updates the screen
-			//  pointer "scnp" to the address of column zero
-			//
-			//  Also updates string pointer 'strp' so that when 'y' register
-			//  is reinitialized to zero, (strp),y points to the next char
-			//  in the string.
-			//
-			//  Contains separate entry point for
-			//  Subroutine "setline", which sets variable "scnp" to
-			//  column zero of the line number contained in accumulator.
-			//
+				// 
+				//  ---- Subroutine "newline" ----
+				//
+				//  Increments the current line number (variable "curlin")
+				//  Resets the curcol variable to zero and updates the screen
+				//  pointer "scnp" to the address of column zero
+				//
+				//  Also updates string pointer 'strp' so that when 'y' register
+				//  is reinitialized to zero, (strp),y points to the next char
+				//  in the string.
+				//
+				//  Contains separate entry point for
+				//  Subroutine "setline", which sets variable "scnp" to
+				//  column zero of the line number contained in accumulator.
+				//
 
 newline:
-			inc curlin		// curlin and curcol defined in main program
+		inc curlin	// curlin and curcol defined in main program
 
 setline:
-							// save 'x' first
-			txa
-			pha
+				// save 'x' first
+		txa
+		pha
 
-			lda curlin		// get curlin in A
-			asl 			// multiply by two to get index into screen addr
-							// table
+		lda curlin	// get curlin in A
+		asl 		// multiply by two to get index into screen addr
+				// table
 
-			tax				// transfer to x index
-			lda scntbl,x	// screen table for column zero addresses
-			sta scnp		// screen pointer
-			inx
-			lda scntbl,x	// high byte addr
-			sta scnp+1
-			lda #0
-			sta curcol		// set current column variable to zero
+		tax		// transfer to x index
+		lda scntbl,x	// screen table for column (LMargin) addresses
+		sta scnp	// screen pointer
+		inx
+		lda scntbl,x	// high byte addr
+		sta scnp+1
+		lda #0
+		sta curcol	// curcol start position = LMargin + 0
 
-			// sync strp to scnp so that 'y' reg is used for both strp and scnp
+				// sync strp to scnp so that 'y' reg is used for both strp and scnp
 
-upd_strp:	tya				// amount to update strp ('y' index)
-			clc
-			adc strp		// low byte of strp
-			bcc noinchi		// we don't need to increment high byte of strp
-			inc strp+1		// increment high byte of strp
+upd_strp:	tya		// amount to update strp ('y' index)
+		clc
+		adc strp	// low byte of strp
+		bcc noinchi	// we don't need to increment high byte of strp
+		inc strp+1	// increment high byte of strp
+		
 noinchi:	sta strp
-			ldy #0			// reset 'y' register to start with zero index into strp
+		ldy #0		// reset 'y' register to start with zero index into strp
 
-							//  Done - Restore 'x' register
-							//  and return to caller
-			pla
-			tax
-			rts
-			//
-			//  ---- End Subroutine "newline.sub" ----
-			//
+							
+				//  Done - Restore 'x' register
+				//  and return to caller
+		pla
+		tax
+		rts
+				//
+				//  ---- End Subroutine "newline.sub" ----
+				//
